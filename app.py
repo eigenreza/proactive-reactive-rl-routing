@@ -196,7 +196,9 @@ if run_btn:
 
         # 5-6. Generate and display figures with captions
         f1 = fig1_network(network, proactive_routes)
-        st.pyplot(f1, use_container_width=True)
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col2:
+            st.pyplot(f1, use_container_width=True)
         st.caption(
             "The EV battery collection network consists of collection locations distributed "
             "across a 200 by 200 km service area, with location size proportional to mean "
@@ -207,7 +209,9 @@ if run_btn:
         plt.close(f1)
 
         f2 = fig2_distance(SIGMA_VALUES, results)
-        st.pyplot(f2, use_container_width=True)
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col2:
+            st.pyplot(f2, use_container_width=True)
         st.caption(
             "Mean total travel distance per collection day as a function of return uncertainty "
             "sigma, averaged across evaluation runs. At higher uncertainty levels, the two-stage "
@@ -218,7 +222,9 @@ if run_btn:
         plt.close(f2)
 
         f3 = fig3_empty_trips(SIGMA_VALUES, results)
-        st.pyplot(f3, use_container_width=True)
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col2:
+            st.pyplot(f3, use_container_width=True)
         st.caption(
             "Mean fraction of location visits resulting in zero batteries collected, as a "
             "function of uncertainty. The two-stage policy reduces the empty trip rate to near "
@@ -228,7 +234,9 @@ if run_btn:
         plt.close(f3)
 
         f4 = fig4_training_curve(training_rewards)
-        st.pyplot(f4, use_container_width=True)
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col2:
+            st.pyplot(f4, use_container_width=True)
         st.caption(
             "Cumulative reward per training episode, smoothed over a 20-episode rolling window. "
             "The clear upward trend confirms that the Q-learning agent learns an increasingly "
