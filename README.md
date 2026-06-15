@@ -1,5 +1,6 @@
 # Proactive-Reactive Routing under Stochastic Returns: A Two-Stage Optimization Framework for EV Battery Collection Logistics
 
+*Reza Azad Gholami*
 ## Overview
 
 Electric vehicle adoption has created a large-scale reverse logistics challenge: used EV batteries accumulate at dispersed collection locations at uncertain rates, and operators must dispatch vehicles daily to recover them. Companies typically plan routes the evening before using historical average battery counts and commit to those fixed routes, dispatching drivers without any morning adjustment. When actual battery quantities on a given day differ substantially from historical averages, drivers arrive at planned stops to find zero batteries available. These empty trips waste fuel, driver hours, and vehicle capacity, degrading operational efficiency precisely when return flows are most unpredictable.
