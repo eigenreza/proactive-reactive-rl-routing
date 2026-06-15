@@ -30,7 +30,7 @@ At sigma = 3.0, the two-stage policy reduces mean travel distance from 826 km to
 
 ## Live Demo
 
-The interactive simulation is deployed at: [ADD STREAMLIT URL HERE AFTER DEPLOYMENT]
+The interactive simulation is deployed at: https://proactive-reactive-rl-routing-dmcswxot8epaarzazyvbgm.streamlit.app. 
 
 Adjust the sigma slider to compare policy performance at different uncertainty levels. Set sigma to 1.0 to see similar performance across policies. Set sigma to 3.0 or 4.0 to see the two-stage policy dramatically outperform the baselines on empty trip rate.
 
