@@ -135,6 +135,8 @@ def fig4_training_curve(training_rewards):
 
 # Page title and description
 st.title("Proactive-Reactive Routing under Stochastic Returns")
+st.markdown("By [Reza Azad Gholami](https://github.com/eigenreza)")
+
 
 st.write(
     "This simulation studies a two-stage decision framework for electric vehicle battery "
