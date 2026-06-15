@@ -4,11 +4,11 @@
 
 Electric vehicle adoption has created a large-scale reverse logistics challenge: used EV batteries accumulate at dispersed collection locations at uncertain rates, and operators must dispatch vehicles daily to recover them. Companies typically plan routes the evening before using historical average battery counts and commit to those fixed routes, dispatching drivers without any morning adjustment. When actual battery quantities on a given day differ substantially from historical averages, drivers arrive at planned stops to find zero batteries available. These empty trips waste fuel, driver hours, and vehicle capacity, degrading operational efficiency precisely when return flows are most unpredictable.
 
-This project implements and evaluates a two-stage routing framework that separates the planning decision from the dispatch decision. In the proactive stage, routes are constructed the evening before using expected battery counts, producing an open-loop plan that optimizes over anticipated demand. In the reactive stage, a Q-learning agent observes the actual revealed battery counts each morning and decides whether to follow the proactive plan, prune confirmed-empty stops, or fully re-optimize from scratch using realized data, representing a closed-loop policy that conditions decisions on information available at dispatch time. Simulation results show that the two-stage policy reduces empty trip rates by over $99%$ at high uncertainty levels compared to proactive-only planning.
+This project implements and evaluates a two-stage routing framework that separates the planning decision from the dispatch decision. In the proactive stage, routes are constructed the evening before using expected battery counts, producing an open-loop plan that optimizes over anticipated demand. In the reactive stage, a Q-learning agent observes the actual revealed battery counts each morning and decides whether to follow the proactive plan, prune confirmed-empty stops, or fully re-optimize from scratch using realized data, representing a closed-loop policy that conditions decisions on information available at dispatch time. Simulation results show that the two-stage policy reduces empty trip rates by over 99% at high uncertainty levels compared to proactive-only planning.
 
 ## Scenario
 
-The simulation uses $15$ collection locations served by $3$ vehicles from a single depot, operating in a $200 \times 200$ km service area over a $10$-day planning horizon. Battery counts at each location follow an independent normal distribution with a location-specific mean drawn from $\mathrm{Uniform}(2,8)$ and held fixed across days, scaled by a shared uncertainty parameter $\sigma$. An empty trip is defined as any vehicle visit to a location where zero batteries are available on that day.
+The simulation uses 15 collection locations served by 3 vehicles from a single depot, operating in a $200 \times 200$ km service area over a 10-day planning horizon. Battery counts at each location follow an independent normal distribution with a location-specific mean drawn from $\mathrm{Uniform}(2,8)$ and held fixed across days, scaled by a shared uncertainty parameter $\sigma$. An empty trip is defined as any vehicle visit to a location where zero batteries are available on that day.
 
 ## Methodology
 
@@ -19,7 +19,7 @@ The proactive route plan is constructed by formulating a capacitated vehicle rou
 The demand model for location $i$ on day $t$ is
 
 $$
-D_{i,t} = \max \left(0, \operatorname{round}(\mu_i + \sigma \epsilon_{i,t}) \right),
+D_{i,t} = \max \left(0, \text{round}(\mu_i + \sigma \epsilon_{i,t}) \right),
 $$
 
 where $\mu_i$ is the location-specific mean and $\epsilon_{i,t} \sim \mathcal{N}(0,1)$ is an independent standard normal draw. The proactive plan uses $\mu_i$ as the demand input and is committed before $\epsilon_{i,t}$ is revealed, making it an open-loop policy.
@@ -59,18 +59,14 @@ with learning rate $\alpha = 0.1$ and discount factor $\gamma = 0.95$.
 The reward function is
 
 $$
-R =
--\text{travel distance}
-+ 30 \times \text{empty trips avoided}
-
-* 50 \times \mathbf{1}{a = 2},
-  $$
+R = -\,\text{travel distance} + 30 \times (\text{empty trips avoided}) - 50 \times \mathbf{1}\{a = 2\},
+$$
 
 where the penalty on Action 2 reflects the cost of re-dispatching. This closed-loop structure conditions each day's dispatch decision on revealed demand information, directly analogous to closed-loop postponement strategies in supply chain optimization where delaying commitment until information arrives consistently reduces waste.
 
 ## Key Results
 
-At $\sigma = 3.0$, the two-stage policy reduces mean travel distance from $826$ km to $792$ km per day, corresponding to a $4.1%$ reduction. It also reduces the mean empty trip rate from $10.1%$ to $0.1%$, corresponding to an approximately $99%$ reduction compared to the proactive-only baseline.
+At $\sigma = 3.0$, the two-stage policy reduces mean travel distance from 826 km to 792 km per day, corresponding to a 4.1% reduction. It also reduces the mean empty trip rate from 10.1% to 0.1%, corresponding to an approximately 99% reduction compared to the proactive-only baseline.
 
 The performance advantage grows with $\sigma$, as higher uncertainty creates more days with extreme deviations where morning adjustment is most valuable. At low uncertainty levels below $\sigma = 1.5$, all three policies perform similarly on both metrics, confirming that reactive adaptation adds operational value primarily when return flows are highly variable and the gap between expected and realized battery counts is large.
 
