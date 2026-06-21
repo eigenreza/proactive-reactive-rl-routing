@@ -304,4 +304,3 @@ $$Q(s,a) \\leftarrow Q(s,a) + \\alpha \\left[ R + \\gamma \\max_{a'} Q(s', a') -
 with learning rate $\\alpha = 0.1$ and discount factor $\\gamma = 0.95$. The reward penalizes travel distance and gives a bonus for avoiding empty trips. So the agent is not just trying to drive less; it is also learning to avoid sending vehicles to places where there is nothing to collect. The practical question is simple: once the morning information is available, is the old route still good enough, or is it worth changing?
 """)
 ```
-git status
