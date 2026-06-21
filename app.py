@@ -1,4 +1,3 @@
-```python
 import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
@@ -140,47 +139,46 @@ st.markdown("By [Reza Azad Gholami](https://github.com/eigenreza)")
 
 
 st.write(
-    "This app is a small routing experiment for used EV battery collection. The awkward part of "
-    "the problem is that the routes have to be planned before the company knows the exact number "
-    "of batteries waiting at each site. So the first plan is made from expected returns. Then, in "
-    "the morning, the real counts are observed, and a Q-learning agent is allowed to decide whether "
-    "the original plan should be kept or changed. The comparison is between three levels of "
-    "decision-making: a naive rule, a proactive route plan, and a two-stage policy that can react "
-    "after the uncertainty has partly disappeared."
+    "This app is a small routing experiment for used EV battery collection. The basic problem is "
+    "simple: the company has to make a route plan before it knows the exact number of batteries "
+    "waiting at each location. So the first plan is made in the evening from expected battery "
+    "returns. The next morning, the real counts are known, and the Q-learning agent gets one more "
+    "chance to decide whether the plan should be kept, cleaned up, or rebuilt. I use the simulation "
+    "to compare that two-step idea with a proactive-only plan and a naive visit-everything policy."
 )
 
 with st.expander("How to use this simulation"):
     st.markdown("""
-**What is being simulated**
+**What this simulation models**
 
-The setting is a simple but realistic collection problem. There is one depot, 3 vehicles, and a set of battery drop-off locations scattered over a 200 by 200 km region. Some locations tend to produce more returned batteries than others, but the actual number on a given day is random.
+The setting is a simple battery pickup network. There is one depot, 3 vehicles, and several collection locations scattered over a 200 by 200 km region. Every location has its own usual level of battery returns, but the actual number changes from day to day. This means the evening plan is never completely wrong, but it is also never guaranteed to match the next morning perfectly.
 
-This matters because a route that looks reasonable the evening before may look wasteful the next morning. A planned stop may have many batteries, a few batteries, or none at all. The simulation is built around that tension: plan early, but maybe revise once better information arrives.
+That is the main point of the app. It asks whether it is worth making a second routing decision after the morning information becomes available.
 
-**The three policies**
+**The three policies compared**
 
-- **Naive Baseline:** The simplest possible rule. Visit every location every day. It is not clever, but it gives a useful lower-quality benchmark.
-- **Proactive Only:** Build the route plan in advance using the expected battery count at each location ($\\mu_i$). Once the plan is made, it is followed as it is. Empty stops are not removed.
-- **Two-Stage (Proactive + Reactive):** Start with the same evening plan. Then, after the morning counts are known, let the Q-learning agent decide whether to keep the routes, cut out empty stops, or re-optimize.
+- **Naive Baseline:** This is the brute-force option. Every location is visited every day. It is simple, but it can easily send a vehicle to a place where nothing is waiting.
+- **Proactive Only:** This policy plans routes in the evening using the expected battery count at each location ($\\mu_i$). After that, it does not react. The vehicles follow the plan even when the morning counts show that some stops are empty.
+- **Two-Stage (Proactive + Reactive):** This policy starts with the same evening plan. Then, in the morning, the actual battery counts are revealed. The Q-learning agent chooses whether to keep the original routes, remove empty stops, or re-optimize the routes.
 
-**What the sliders do**
+**What the sliders control**
 
-- **Return uncertainty ($\\sigma$):** This is the most important control. Small values mean that daily returns stay fairly close to their averages. Large values mean that the morning can look quite different from the evening forecast. With high $\\sigma$, empty trips become much more likely.
-- **Collection locations:** The number of drop-off sites in the network. More sites usually means a messier routing problem.
-- **Vehicle capacity:** The maximum number of battery units a vehicle can carry.
-- **RL training episodes:** The number of simulated days used to train the Q-learning agent before testing it. A larger value gives the agent more practice, but it also slows down the run.
-- **Evaluation runs:** The number of repeated simulation runs used to compute the plotted averages. Higher values reduce random noise in the curves.
+- **Return uncertainty ($\\sigma$):** This is the most important knob in the app. Small values mean the daily counts stay close to their averages. Large values mean the day can look quite different from the evening forecast. At $\\sigma = 0.5$, the proactive plan usually has good information. At $\\sigma = 3.0$ or $\\sigma = 4.0$, some planned stops may suddenly be useless because no batteries are actually there.
+- **Collection locations:** This sets how many drop-off locations are included. More locations usually means a messier routing problem.
+- **Vehicle capacity:** This is how many battery units one vehicle can carry on a trip.
+- **RL training episodes:** This is the number of simulated training days used for the Q-learning agent. More episodes give the agent more practice, but the simulation takes longer.
+- **Evaluation runs:** This controls how many independent runs are averaged in the plots. A higher number gives smoother curves, but again it costs more time.
 
-**Reading the figures**
+**How to read the figures**
 
-- **Figure 1** is just the network layout. The depot is shown together with the collection sites, and one planned route is drawn as an example.
-- **Figure 2** reports average daily travel distance. The lower the curve, the less driving the policy needs on average.
-- **Figure 3** is the figure I would look at first. It measures empty trips: visits where the vehicle reaches a site and collects zero batteries. These are pure waste in this model.
-- **Figure 4** gives the training curve for the Q-learning agent. It will not be perfectly smooth, but the trend should show whether the agent is improving.
+- **Figure 1** is just the network map. It shows the depot, the collection locations, and one sample proactive route.
+- **Figure 2** shows how much driving the policies produce on average. Lower is better. The interesting part is whether the two-stage policy starts to save distance when uncertainty becomes larger.
+- **Figure 3** is the figure I would look at first. It shows empty trips: visits where a vehicle arrives and collects zero batteries. These are pure waste from an operational point of view.
+- **Figure 4** shows the training curve for the Q-learning agent. It will not be perfectly smooth, and it should not be read too literally point by point. The useful thing is the overall direction.
 
-**A quick test to try**
+**Suggested experiment**
 
-Run the model once with $\\sigma = 1.0$. Then run it again with something like $\\sigma = 3.5$. The difference should be most visible in Figure 3. When the returns are stable, the evening plan is often good enough. When returns are noisy, the morning correction becomes much more valuable.
+Try $\\sigma = 1.0$ first and run the simulation. Then try something like $\\sigma = 3.5$. In the low-uncertainty case, the evening plan should already be quite reasonable. In the high-uncertainty case, the value of the morning correction should become much easier to see, especially in Figure 3.
     """)
 
 # Sidebar
@@ -188,14 +186,14 @@ with st.sidebar:
     st.header("Simulation Parameters")
     sigma = st.slider("Return uncertainty (sigma)", min_value=0.5, max_value=4.0,
                       value=2.0, step=0.1, key="sigma")
-    st.caption("Low σ gives fairly predictable daily counts. High σ creates more surprises, which is where the reactive policy has a chance to help.")
+    st.caption("Small σ gives a calmer day. Large σ gives more surprises, so the morning adjustment has more room to help.")
     n_nodes = st.slider("Collection locations", min_value=8, max_value=20,
                         value=15, step=1, key="n_nodes")
     capacity = st.slider("Vehicle capacity (units)", min_value=10, max_value=30,
                          value=20, step=5, key="capacity")
     n_episodes = st.slider("RL training episodes", min_value=100, max_value=1000,
                            value=500, step=100, key="n_episodes")
-    st.caption("More training usually helps, but it also increases the runtime. 500 is a sensible starting value.")
+    st.caption("More training can improve the agent, but it also makes the run slower. 500 is a practical starting point.")
     n_runs = st.slider("Evaluation runs", min_value=50, max_value=300,
                        value=200, step=50, key="n_runs")
     run_btn = st.button("Run Simulation", type="primary")
@@ -203,7 +201,7 @@ with st.sidebar:
 SIGMA_VALUES = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
 
 if run_btn:
-    with st.spinner("Training the Q-learning agent and running the simulations. This may take a short while."):
+    with st.spinner("Running the training and evaluation now. This can take a little while."):
         # Patch module-level constants to match slider values
         routing_mod.VEHICLE_CAPACITY = capacity
         rl_mod.N_TRAIN_EPISODES = n_episodes
@@ -236,10 +234,10 @@ if run_btn:
         with col2:
             st.pyplot(f1, use_container_width=True)
         st.caption(
-            "This is the simulated service area. The red square is the depot, and the blue points "
-            "are collection sites. Bigger blue points mean higher expected battery returns. The "
-            "green dashed line is one example of a route that is planned before the actual daily "
-            "counts are known."
+            "This is the simulated service area. The depot is in the middle, and the blue points "
+            "are the collection sites. Bigger points mean higher expected battery returns. The "
+            "green dashed line is one example of a route planned before the actual daily counts "
+            "are known."
         )
         plt.close(f1)
 
@@ -248,10 +246,10 @@ if run_btn:
         with col2:
             st.pyplot(f2, use_container_width=True)
         st.caption(
-            "Here I compare how much driving the three policies produce on average. When the "
-            "uncertainty is low, the evening plan is already fairly reliable. As uncertainty grows, "
-            "the two-stage policy has more opportunity to save distance because it can use the "
-            "morning information before dispatch."
+            "Here I compare average driving distance. When uncertainty is small, the forecast-based "
+            "plan is already fairly reliable, so there may not be much to gain. When uncertainty "
+            "gets larger, the morning information becomes more useful, and the two-stage policy can "
+            "avoid some unnecessary driving."
         )
         plt.close(f2)
 
@@ -260,10 +258,10 @@ if run_btn:
         with col2:
             st.pyplot(f3, use_container_width=True)
         st.caption(
-            "This is the most direct measure of wasted work in the simulation. An empty trip means "
-            "that a vehicle visits a site but finds no batteries to collect. The reactive step is "
-            "mainly useful because it can remove those confirmed-empty stops before the vehicles "
-            "leave."
+            "This plot is about wasted visits. An empty trip means the vehicle went to a site and "
+            "collected zero batteries. That is exactly the kind of mistake a fixed evening plan can "
+            "make under uncertainty. The reactive step tries to remove those stops once the morning "
+            "counts are known."
         )
         plt.close(f3)
 
@@ -272,10 +270,9 @@ if run_btn:
         with col2:
             st.pyplot(f4, use_container_width=True)
         st.caption(
-            "This curve shows the reward obtained by the Q-learning agent during training, after "
-            "smoothing over 20 episodes. Individual training episodes can jump around, so the main "
-            "thing to watch is the direction of the curve. A rising pattern means that the agent is "
-            "learning better morning adjustment decisions."
+            "This shows the reward collected by the Q-learning agent during training, after smoothing "
+            "over 20 episodes. I mainly use this as a sanity check. If the curve generally improves, "
+            "the agent is picking up useful patterns instead of choosing adjustments at random."
         )
         plt.close(f4)
 
@@ -287,20 +284,17 @@ The number of batteries ready for pickup at location $i$ on day $t$ is modeled a
 
 $$D_{i,t} = \\max\\left(0,\\ \\mathrm{round}\\left(\\mu_i + \\sigma \\cdot \\varepsilon_{i,t}\\right)\\right)$$
 
-Here $\\mu_i$ is the typical return level at location $i$. It is drawn once from $\\mathrm{Uniform}(2, 8)$ and then kept fixed, so the locations are not all identical. The random term $\\varepsilon_{i,t}$ is an independent standard normal draw. It is there to represent the ordinary day-to-day variation in returned batteries. The parameter $\\sigma$ controls how strong that variation is. When $\\sigma$ is small, the realized counts stay close to the planned values. When $\\sigma$ is large, the evening plan becomes much less reliable, and some scheduled stops may turn out to have no batteries at all.
+Here, $\\mu_i$ is the typical return level for location $i$. It is drawn once from $\\mathrm{Uniform}(2, 8)$ and then kept fixed during the simulation. The random variable $\\varepsilon_{i,t}$ is an independent standard normal draw, so it gives the day-to-day fluctuation around that typical level. The parameter $\\sigma$ controls how large this fluctuation is. When $\\sigma$ is small, the realized counts stay close to what the evening plan expected. When $\\sigma$ is large, a location that looked worthwhile in the plan can easily turn out to have no batteries the next morning.
 """)
 
 st.markdown("""
-The proactive route plan treats the expected counts $\\mu_i$ as deterministic demands. In other words, the first plan ignores the morning noise and solves the routing problem using the average return levels. The routes are built in two steps. First, a nearest-neighbor greedy rule assigns locations to vehicles while respecting capacity. Then a 2-opt local search tries to shorten each route by reversing parts of the route when doing so reduces Euclidean travel distance.
-
-This is not meant to be an exact industrial vehicle-routing solver. It is a controlled way to produce a reasonable evening plan, which is enough for studying the main question here: how much is gained by adjusting that plan after the random counts are revealed?
+The proactive plan is made by treating the expected counts $\\mu_i$ as deterministic demands. In other words, the evening planner temporarily ignores the random shock and solves the routing problem using the best available average information. The routes are built with a nearest-neighbor greedy heuristic that assigns locations to vehicles while respecting capacity. After that, a 2-opt local search improves the routes by reversing route segments when this reduces the total Euclidean distance. This is not meant to be an exact solver. It is a reasonable planning heuristic for producing a baseline route before the uncertain part of the day has been observed.
 """)
 
 st.markdown("""
-In the morning, the actual battery counts $D_{i,t}$ are observed before the vehicles depart. The Q-learning agent compares the realized counts with the expected counts through the ratio $r_i = D_{i,t} / \\mu_i$, using a discretized version of that information as its state. It then chooses one of three actions: follow the proactive plan unchanged, prune confirmed-empty stops while keeping the route order, or re-optimize the routes using the actual counts. The agent is trained via the Bellman update:
+In the morning, the actual values $D_{i,t}$ are known before the vehicles leave. The Q-learning agent compares the realized counts with the expected counts through the ratio $r_i = D_{i,t} / \\mu_i$, using a discretized state representation. It then chooses one of three actions: follow the proactive plan unchanged, prune confirmed-empty stops while keeping the route order, or fully re-optimize the routes using the actual counts. The agent is trained via the Bellman update:
 
 $$Q(s,a) \\leftarrow Q(s,a) + \\alpha \\left[ R + \\gamma \\max_{a'} Q(s', a') - Q(s,a) \\right]$$
 
-with learning rate $\\alpha = 0.1$ and discount factor $\\gamma = 0.95$. The reward penalizes travel distance and gives a bonus for avoiding empty trips. So the agent is not just trying to drive less; it is also learning to avoid sending vehicles to places where there is nothing to collect. The practical question is simple: once the morning information is available, is the old route still good enough, or is it worth changing?
+with learning rate $\\alpha = 0.1$ and discount factor $\\gamma = 0.95$. The reward penalizes travel distance and rewards avoided empty trips. So the agent is not learning an abstract goal; it is learning a very practical dispatch rule. On a given morning, should the company trust the route plan from last night, remove obviously useless stops, or spend the effort to re-optimize? That is the closed-loop part of the model.
 """)
-```
