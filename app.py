@@ -140,7 +140,7 @@ st.markdown("By [Reza Azad Gholami](https://github.com/eigenreza)")
 
 st.write(
     "This app is a small routing experiment for used EV battery collection. The basic problem is "
-    "simple: the company has to make a route plan before it knows the exact number of batteries "
+    "as follows: the company has to make a route plan before it knows the exact number of batteries "
     "waiting at each location. So the first plan is made in the evening from expected battery "
     "returns. The next morning, the real counts are known, and the Q-learning agent gets one more "
     "chance to decide whether the plan should be kept, cleaned up, or rebuilt. I use the simulation "
@@ -151,7 +151,7 @@ with st.expander("How to use this simulation"):
     st.markdown("""
 **What this simulation models**
 
-The setting is a simple battery pickup network. There is one depot, 3 vehicles, and several collection locations scattered over a 200 by 200 km region. Every location has its own usual level of battery returns, but the actual number changes from day to day. This means the evening plan is never completely wrong, but it is also never guaranteed to match the next morning perfectly.
+The setting is a battery pickup network. There is one depot, 3 vehicles, and several collection locations scattered over a 200 by 200 km region. Every location has its own usual level of battery returns, but the actual number changes from day to day. This means the evening plan is never completely wrong, but it is also never guaranteed to match the next morning perfectly.
 
 That is the main point of the app. It asks whether it is worth making a second routing decision after the morning information becomes available.
 
